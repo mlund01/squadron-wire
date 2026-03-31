@@ -50,6 +50,8 @@ const (
 	EventAgentCallingTool          MissionEventType = "agent_calling_tool"
 	EventAgentToolComplete         MissionEventType = "agent_tool_complete"
 	EventAgentAnswer               MissionEventType = "agent_answer"
+	EventAgentAskCommander         MissionEventType = "agent_ask_commander"
+	EventAgentCommanderResponse    MissionEventType = "agent_commander_response"
 	EventRouteChosen       MissionEventType = "route_chosen"
 
 	// Schedule/trigger events
@@ -216,8 +218,9 @@ type SessionTurnData struct {
 // Agent events
 
 type AgentStartedData struct {
-	TaskName  string `json:"taskName"`
-	AgentName string `json:"agentName"`
+	TaskName    string `json:"taskName"`
+	AgentName   string `json:"agentName"`
+	Instruction string `json:"instruction,omitempty"`
 }
 
 type AgentCompletedData struct {
@@ -253,6 +256,18 @@ type AgentToolCompleteData struct {
 }
 
 type AgentAnswerData struct {
+	TaskName  string `json:"taskName"`
+	AgentName string `json:"agentName"`
+	Content   string `json:"content"`
+}
+
+type AgentAskCommanderData struct {
+	TaskName  string `json:"taskName"`
+	AgentName string `json:"agentName"`
+	Content   string `json:"content"`
+}
+
+type AgentCommanderResponseData struct {
 	TaskName  string `json:"taskName"`
 	AgentName string `json:"agentName"`
 	Content   string `json:"content"`
