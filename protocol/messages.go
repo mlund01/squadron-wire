@@ -686,6 +686,56 @@ type DownloadDirectoryResultPayload struct {
 }
 
 // =============================================================================
+// OAuth proxy (MCP login through command center)
+// =============================================================================
+
+// OAuthRegisterFlowPayload is sent by squadron to commander to reserve an
+// OAuth flow before launching the user's browser. Commander stores the
+// mapping `state → {instanceID, mcpName}` and later uses `state` in the IdP
+// callback to route the code back to the right squadron.
+type OAuthRegisterFlowPayload struct {
+	State   string `json:"state"`
+	McpName string `json:"mcpName"`
+}
+
+// OAuthRegisterFlowAckPayload confirms the flow was stored.
+type OAuthRegisterFlowAckPayload struct {
+	Accepted bool   `json:"accepted"`
+	Reason   string `json:"reason,omitempty"`
+}
+
+// OAuthCallbackDeliveryPayload is sent by commander to squadron when the IdP
+// redirects a user to commander's /oauth/callback. Squadron's
+// WsbridgeCallbackSource listens on `state` to complete the login flow.
+type OAuthCallbackDeliveryPayload struct {
+	State string `json:"state"`
+	Code  string `json:"code,omitempty"`
+	Error string `json:"error,omitempty"` // non-empty on IdP-side failure
+}
+
+// OAuthCallbackAckPayload confirms squadron received the callback params.
+type OAuthCallbackAckPayload struct {
+	Accepted bool   `json:"accepted"`
+	Reason   string `json:"reason,omitempty"`
+}
+
+// StartMCPLoginPayload is sent by commander to squadron to initiate an
+// OAuth login for a named MCP server from the UI. Squadron kicks off the
+// flow using the WsbridgeCallbackSource and returns the authorization URL
+// mid-flow so the browser can open it in a new tab.
+type StartMCPLoginPayload struct {
+	McpName string `json:"mcpName"`
+}
+
+// StartMCPLoginAckPayload carries the IdP authorization URL back to the
+// browser. If Accepted is false, Reason explains why.
+type StartMCPLoginAckPayload struct {
+	Accepted bool   `json:"accepted"`
+	AuthURL  string `json:"authUrl,omitempty"`
+	Reason   string `json:"reason,omitempty"`
+}
+
+// =============================================================================
 // Error
 // =============================================================================
 
