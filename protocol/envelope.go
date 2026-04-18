@@ -103,6 +103,14 @@ const (
 	TypeDownloadDirectory       MessageType = "download_directory"
 	TypeDownloadDirectoryResult MessageType = "download_directory_result"
 
+	// OAuth proxy (MCP login through command center)
+	TypeOAuthRegisterFlow     MessageType = "oauth_register_flow"
+	TypeOAuthRegisterFlowAck  MessageType = "oauth_register_flow_ack"
+	TypeOAuthCallbackDelivery MessageType = "oauth_callback_delivery"
+	TypeOAuthCallbackAck      MessageType = "oauth_callback_ack"
+	TypeStartMCPLogin         MessageType = "start_mcp_login"
+	TypeStartMCPLoginAck      MessageType = "start_mcp_login_ack"
+
 	// Error
 	TypeError MessageType = "error"
 )
