@@ -58,6 +58,10 @@ const (
 	EventScheduledRun  MissionEventType = "scheduled_run"
 	EventTriggeredRun  MissionEventType = "triggered_run"
 	EventScheduleSkip  MissionEventType = "schedule_skip"
+
+	// Human-in-the-loop events
+	EventHumanInputRequested MissionEventType = "human_input_requested"
+	EventHumanInputResolved  MissionEventType = "human_input_resolved"
 )
 
 // =============================================================================
@@ -326,4 +330,28 @@ type ScheduleSkipData struct {
 	MissionName string `json:"missionName"`
 	Source      string `json:"source"` // "schedule", "schedule[1]", "manual", "webhook"
 	Reason      string `json:"reason"`
+}
+
+// Human-in-the-loop event data
+
+type HumanInputRequestedData struct {
+	TaskName          string   `json:"taskName,omitempty"`
+	AgentName         string   `json:"agentName,omitempty"`
+	ToolCallID        string   `json:"toolCallId"`
+	Question          string   `json:"question"`
+	ShortSummary      string   `json:"shortSummary,omitempty"`
+	AdditionalContext string   `json:"additionalContext,omitempty"`
+	Choices           []string `json:"choices,omitempty"`
+	// MultiSelect=true tells the UI/gateway to render a multi-select
+	// picker. Resolved response is then a JSON-encoded array of strings.
+	MultiSelect bool `json:"multiSelect,omitempty"`
+}
+
+type HumanInputResolvedData struct {
+	TaskName        string `json:"taskName,omitempty"`
+	AgentName       string `json:"agentName,omitempty"`
+	ToolCallID      string `json:"toolCallId"`
+	Response        string `json:"response"`
+	ResponderUserID string `json:"responderUserId,omitempty"`
+	TimedOut        bool   `json:"timedOut,omitempty"`
 }

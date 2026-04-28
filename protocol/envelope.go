@@ -103,6 +103,13 @@ const (
 	TypeDownloadDirectory       MessageType = "download_directory"
 	TypeDownloadDirectoryResult MessageType = "download_directory_result"
 
+	// Human-in-the-loop (ask_human tool) — commander proxies queries and
+	// resolution through to squadron, which owns the data.
+	TypeGetHumanInputs           MessageType = "get_human_inputs"
+	TypeGetHumanInputsResult     MessageType = "get_human_inputs_result"
+	TypeResolveHumanInput        MessageType = "resolve_human_input"
+	TypeResolveHumanInputResult  MessageType = "resolve_human_input_result"
+
 	// Error
 	TypeError MessageType = "error"
 )

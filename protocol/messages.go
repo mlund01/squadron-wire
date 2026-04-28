@@ -765,3 +765,64 @@ type GetCostSummaryResultPayload struct {
 	RecentMissions  []MissionCostRow   `json:"recentMissions"`
 	ByDateAndField  []DateFieldCostRow `json:"byDateAndField,omitempty"`
 }
+
+// =============================================================================
+// Human-in-the-loop (ask_human tool)
+// =============================================================================
+//
+// Squadron owns persistence; commander proxies via GetHumanInputs and
+// ResolveHumanInput. Live updates flow through the existing mission
+// event channel as EventHumanInputRequested / EventHumanInputResolved.
+
+// HumanInputRecord is the JSON-safe mirror of squadron's stored row.
+// MissionName/TaskName are filled in server-side so clients don't have
+// to resolve ULIDs themselves.
+type HumanInputRecord struct {
+	ID                string   `json:"id"`
+	MissionID         string   `json:"missionId,omitempty"`
+	MissionName       string   `json:"missionName,omitempty"`
+	TaskID            string   `json:"taskId,omitempty"`
+	TaskName          string   `json:"taskName,omitempty"`
+	ToolCallID        string   `json:"toolCallId"`
+	Question          string   `json:"question"`
+	ShortSummary      string   `json:"shortSummary,omitempty"`
+	AdditionalContext string   `json:"additionalContext,omitempty"`
+	Choices           []string `json:"choices,omitempty"`
+	MultiSelect       bool     `json:"multiSelect,omitempty"`
+	State             string   `json:"state"` // "open" | "resolved"
+	RequestedAt       string   `json:"requestedAt"`
+	ResolvedAt        string   `json:"resolvedAt,omitempty"`
+	Response          string   `json:"response,omitempty"`
+	ResponderUserID   string   `json:"responderUserId,omitempty"`
+}
+
+// GetHumanInputsPayload is sent by commander to squadron to list
+// requests. Filters mirror the common list shape elsewhere in the API.
+type GetHumanInputsPayload struct {
+	State       string `json:"state,omitempty"`       // "open" (default) or "resolved"
+	MissionID   string `json:"missionId,omitempty"`    // restrict to one mission
+	OldestFirst bool   `json:"oldestFirst,omitempty"`  // default ordering is oldest-first
+	Limit       int    `json:"limit,omitempty"`
+	Offset      int    `json:"offset,omitempty"`
+}
+
+type GetHumanInputsResultPayload struct {
+	HumanInputs []HumanInputRecord `json:"humanInputs"`
+	Total       int                `json:"total"`
+}
+
+// ResolveHumanInputPayload carries the human's response from commander
+// to squadron. Response is the chosen choice verbatim or the free-text
+// the human typed — squadron returns it as the tool's observation string
+// without further interpretation.
+type ResolveHumanInputPayload struct {
+	ToolCallID      string `json:"toolCallId"`
+	Response        string `json:"response"`
+	ResponderUserID string `json:"responderUserId,omitempty"`
+}
+
+type ResolveHumanInputResultPayload struct {
+	Accepted    bool             `json:"accepted"`
+	Reason      string           `json:"reason,omitempty"`
+	HumanInput  HumanInputRecord `json:"humanInput,omitempty"`
+}
