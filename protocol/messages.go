@@ -1,5 +1,7 @@
 package protocol
 
+import "encoding/json"
+
 // =============================================================================
 // Registration
 // =============================================================================
@@ -250,6 +252,21 @@ type MissionCompletePayload struct {
 	MissionID string `json:"missionId"`
 	Status    string `json:"status"` // "completed" or "failed"
 	Error     string `json:"error,omitempty"`
+}
+
+// NotificationPayload is a mission-lifecycle notification pushed to the
+// command center. Event is one of "mission_completed", "mission_failed",
+// "mission_stopped". Outputs is set for "mission_completed" and Error for
+// "mission_failed".
+type NotificationPayload struct {
+	MissionID   string           `json:"missionId"`
+	MissionName string           `json:"missionName"`
+	Event       string           `json:"event"`
+	Title       string           `json:"title"`
+	Message     string           `json:"message,omitempty"`
+	OccurredAt  string           `json:"occurredAt"` // RFC3339Nano
+	Error       string           `json:"error,omitempty"`
+	Outputs     json.RawMessage  `json:"outputs,omitempty"`
 }
 
 // =============================================================================

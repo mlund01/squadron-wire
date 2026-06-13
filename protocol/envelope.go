@@ -110,6 +110,10 @@ const (
 	TypeResolveHumanInput        MessageType = "resolve_human_input"
 	TypeResolveHumanInputResult  MessageType = "resolve_human_input_result"
 
+	// Mission-lifecycle notifications — squadron pushes these to the
+	// command center when a mission opts into command_center notifications.
+	TypeNotification MessageType = "notification"
+
 	// Error
 	TypeError MessageType = "error"
 )
