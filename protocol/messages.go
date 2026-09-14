@@ -28,12 +28,12 @@ type RegisterAckPayload struct {
 // InstanceConfig is a JSON-serializable snapshot of a squadron instance's config.
 // No HCL expressions or cty values — only plain types.
 type InstanceConfig struct {
-	Models    []ModelInfo    `json:"models"`
-	Agents    []AgentInfo    `json:"agents"`
-	Missions  []MissionInfo  `json:"missions"`
-	Plugins   []PluginInfo   `json:"plugins"`
-	Variables    []VariableInfo    `json:"variables"`
-	Skills       []SkillInfo       `json:"skills,omitempty"`
+	Models        []ModelInfo        `json:"models"`
+	Agents        []AgentInfo        `json:"agents"`
+	Missions      []MissionInfo      `json:"missions"`
+	Plugins       []PluginInfo       `json:"plugins"`
+	Variables     []VariableInfo     `json:"variables"`
+	Skills        []SkillInfo        `json:"skills,omitempty"`
 	SharedFolders []SharedFolderInfo `json:"sharedFolders,omitempty"`
 }
 
@@ -64,6 +64,7 @@ type AgentInfo struct {
 type MissionInfo struct {
 	Name        string             `json:"name"`
 	Description string             `json:"description,omitempty"`
+	Source      *ConfigSourceInfo  `json:"source,omitempty"`
 	Commander   string             `json:"commander,omitempty"`
 	Agents      []string           `json:"agents,omitempty"`
 	Inputs      []MissionInputInfo `json:"inputs,omitempty"`
@@ -72,6 +73,17 @@ type MissionInfo struct {
 	Schedules   []ScheduleInfo     `json:"schedules,omitempty"`
 	Trigger     *TriggerInfo       `json:"trigger,omitempty"`
 	MaxParallel int                `json:"maxParallel,omitempty"`
+}
+
+// ConfigSourceInfo identifies the exact configuration block loaded by the
+// runner. Content is the original source slice; FileRevision identifies the
+// complete file snapshot it came from.
+type ConfigSourceInfo struct {
+	Path         string `json:"path"`
+	StartLine    int    `json:"startLine"`
+	EndLine      int    `json:"endLine"`
+	Content      string `json:"content"`
+	FileRevision string `json:"fileRevision"`
 }
 
 // ScheduleInfo describes a schedule for display in the command center UI.
@@ -93,10 +105,10 @@ type TriggerInfo struct {
 }
 
 type DatasetInfo struct {
-	Name        string          `json:"name"`
-	Description string          `json:"description,omitempty"`
-	BindTo      string          `json:"bindTo,omitempty"`
-	Schema      []DatasetField  `json:"schema,omitempty"`
+	Name        string         `json:"name"`
+	Description string         `json:"description,omitempty"`
+	BindTo      string         `json:"bindTo,omitempty"`
+	Schema      []DatasetField `json:"schema,omitempty"`
 }
 
 type DatasetField struct {
@@ -106,13 +118,13 @@ type DatasetField struct {
 }
 
 type MissionInputInfo struct {
-	Name        string              `json:"name"`
-	Description string              `json:"description,omitempty"`
-	Type        string              `json:"type,omitempty"`
-	Required    bool                `json:"required"`
-	Protected   bool                `json:"protected,omitempty"`
-	Items       *MissionInputInfo   `json:"items,omitempty"`
-	Properties  []MissionInputInfo  `json:"properties,omitempty"`
+	Name        string             `json:"name"`
+	Description string             `json:"description,omitempty"`
+	Type        string             `json:"type,omitempty"`
+	Required    bool               `json:"required"`
+	Protected   bool               `json:"protected,omitempty"`
+	Items       *MissionInputInfo  `json:"items,omitempty"`
+	Properties  []MissionInputInfo `json:"properties,omitempty"`
 }
 
 type TaskInfo struct {
@@ -144,7 +156,6 @@ type TaskRouteInfo struct {
 	IsMission bool   `json:"isMission,omitempty"`
 }
 
-
 type PluginInfo struct {
 	Name    string     `json:"name"`
 	Path    string     `json:"path"`
@@ -155,9 +166,9 @@ type PluginInfo struct {
 }
 
 type ToolInfo struct {
-	Name        string          `json:"name"`
-	Description string          `json:"description,omitempty"`
-	Parameters  *ToolSchema     `json:"parameters,omitempty"`
+	Name        string      `json:"name"`
+	Description string      `json:"description,omitempty"`
+	Parameters  *ToolSchema `json:"parameters,omitempty"`
 }
 
 type ToolSchema struct {
@@ -240,9 +251,9 @@ type ResumeMissionAckPayload struct {
 
 // MissionEventPayload wraps a streaming mission execution event.
 type MissionEventPayload struct {
-	MissionID string          `json:"missionId"`
+	MissionID string           `json:"missionId"`
 	EventType MissionEventType `json:"eventType"`
-	Data      interface{}     `json:"data"`
+	Data      interface{}      `json:"data"`
 }
 
 // MissionCompletePayload signals terminal status for a mission.
@@ -322,14 +333,24 @@ type SubtaskInfo struct {
 }
 
 type ToolResultDTO struct {
-	ID          string `json:"id"`
-	SessionID   string `json:"sessionId"`
-	ToolCallId  string `json:"toolCallId,omitempty"`
-	ToolName    string `json:"toolName"`
-	InputParams string `json:"inputParams,omitempty"`
-	Output      string `json:"output,omitempty"`
-	StartedAt   string `json:"startedAt"`
-	FinishedAt  string `json:"finishedAt"`
+	ID          string         `json:"id"`
+	SessionID   string         `json:"sessionId"`
+	ToolCallId  string         `json:"toolCallId,omitempty"`
+	ToolName    string         `json:"toolName"`
+	InputParams string         `json:"inputParams,omitempty"`
+	Output      string         `json:"output,omitempty"`
+	Media       []ToolMediaDTO `json:"media,omitempty"`
+	StartedAt   string         `json:"startedAt"`
+	FinishedAt  string         `json:"finishedAt"`
+}
+
+// ToolMediaDTO is a persisted media attachment with explicit ownership by the
+// enclosing tool result. Data contains base64 without a data-URL prefix.
+type ToolMediaDTO struct {
+	Kind      string `json:"kind"`
+	MediaType string `json:"mediaType"`
+	Data      string `json:"data"`
+	Filename  string `json:"filename,omitempty"`
 }
 
 type GetEventsPayload struct {
@@ -571,48 +592,10 @@ type ValidateConfigResultPayload struct {
 	Errors []string `json:"errors,omitempty"`
 }
 
-// =============================================================================
-// Variable operations
-// =============================================================================
-
-type VariableDetail struct {
-	Name     string `json:"name"`
-	Secret   bool   `json:"secret"`
-	Value    string `json:"value"`             // full value (non-secret) or masked (secret)
-	HasValue bool   `json:"hasValue"`           // true if a value is resolved
-	Default  string `json:"default,omitempty"`  // HCL default value
-	Source   string `json:"source"`             // "override", "default", or "unset"
-}
-
-type GetVariablesPayload struct{}
-
-type GetVariablesResultPayload struct {
-	Variables []VariableDetail `json:"variables"`
-}
-
-type SetVariablePayload struct {
-	Name  string `json:"name"`
-	Value string `json:"value"`
-}
-
-type SetVariableResultPayload struct {
-	Success     bool            `json:"success"`
-	Error       string          `json:"error,omitempty"`
-	ConfigReady bool            `json:"configReady,omitempty"`
-	ConfigError string          `json:"configError,omitempty"`
-	Config      *InstanceConfig `json:"config,omitempty"` // updated config after reload (nil if reload failed)
-}
-
-type DeleteVariablePayload struct {
-	Name string `json:"name"`
-}
-
-type DeleteVariableResultPayload struct {
-	Success     bool            `json:"success"`
-	Error       string          `json:"error,omitempty"`
-	ConfigReady bool            `json:"configReady,omitempty"`
-	ConfigError string          `json:"configError,omitempty"`
-	Config      *InstanceConfig `json:"config,omitempty"`
+// SyncVariablesPayload is the complete workspace-value snapshot sent by
+// Command Center. The worker replaces its in-memory snapshot atomically.
+type SyncVariablesPayload struct {
+	Values map[string]string `json:"values"`
 }
 
 // =============================================================================
@@ -717,12 +700,12 @@ type ErrorPayload struct {
 
 type SubscribePayload struct {
 	Scope     string `json:"scope"`               // "global" or "mission"
-	MissionID string `json:"missionId,omitempty"`  // required when scope = "mission"
+	MissionID string `json:"missionId,omitempty"` // required when scope = "mission"
 }
 
 type UnsubscribePayload struct {
 	Scope     string `json:"scope"`               // "global" or "mission"
-	MissionID string `json:"missionId,omitempty"`  // required when scope = "mission"
+	MissionID string `json:"missionId,omitempty"` // required when scope = "mission"
 }
 
 // =============================================================================
@@ -747,12 +730,12 @@ type CostSummaryRow struct {
 }
 
 type MissionCostRow struct {
-	MissionID   string `json:"missionId"`
-	MissionName string `json:"missionName"`
-	Status      string `json:"status"`
-	Turns       int    `json:"turns"`
+	MissionID   string  `json:"missionId"`
+	MissionName string  `json:"missionName"`
+	Status      string  `json:"status"`
+	Turns       int     `json:"turns"`
 	TotalCost   float64 `json:"totalCost"`
-	StartedAt   string `json:"startedAt"`
+	StartedAt   string  `json:"startedAt"`
 }
 
 type CostTotals struct {
@@ -773,10 +756,10 @@ type DateFieldCostRow struct {
 }
 
 type GetCostSummaryResultPayload struct {
-	Totals          CostTotals         `json:"totals"`
-	ByGroup         []CostSummaryRow   `json:"byGroup"`
-	RecentMissions  []MissionCostRow   `json:"recentMissions"`
-	ByDateAndField  []DateFieldCostRow `json:"byDateAndField,omitempty"`
+	Totals         CostTotals         `json:"totals"`
+	ByGroup        []CostSummaryRow   `json:"byGroup"`
+	RecentMissions []MissionCostRow   `json:"recentMissions"`
+	ByDateAndField []DateFieldCostRow `json:"byDateAndField,omitempty"`
 }
 
 // =============================================================================
@@ -813,8 +796,8 @@ type HumanInputRecord struct {
 // requests. Filters mirror the common list shape elsewhere in the API.
 type GetHumanInputsPayload struct {
 	State       string `json:"state,omitempty"`       // "open" (default) or "resolved"
-	MissionID   string `json:"missionId,omitempty"`    // restrict to one mission
-	OldestFirst bool   `json:"oldestFirst,omitempty"`  // default ordering is oldest-first
+	MissionID   string `json:"missionId,omitempty"`   // restrict to one mission
+	OldestFirst bool   `json:"oldestFirst,omitempty"` // default ordering is oldest-first
 	Limit       int    `json:"limit,omitempty"`
 	Offset      int    `json:"offset,omitempty"`
 }
@@ -835,7 +818,7 @@ type ResolveHumanInputPayload struct {
 }
 
 type ResolveHumanInputResultPayload struct {
-	Accepted    bool             `json:"accepted"`
-	Reason      string           `json:"reason,omitempty"`
-	HumanInput  HumanInputRecord `json:"humanInput,omitempty"`
+	Accepted   bool             `json:"accepted"`
+	Reason     string           `json:"reason,omitempty"`
+	HumanInput HumanInputRecord `json:"humanInput,omitempty"`
 }

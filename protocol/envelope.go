@@ -22,24 +22,24 @@ const (
 	TypeGetConfigResult MessageType = "get_config_result"
 
 	// Mission execution
-	TypeRunMission      MessageType = "run_mission"
-	TypeRunMissionAck   MessageType = "run_mission_ack"
-	TypeStopMission     MessageType = "stop_mission"
-	TypeStopMissionAck  MessageType = "stop_mission_ack"
-	TypeResumeMission     MessageType = "resume_mission"
-	TypeResumeMissionAck  MessageType = "resume_mission_ack"
-	TypeMissionEvent    MessageType = "mission_event"
-	TypeMissionComplete MessageType = "mission_complete"
+	TypeRunMission       MessageType = "run_mission"
+	TypeRunMissionAck    MessageType = "run_mission_ack"
+	TypeStopMission      MessageType = "stop_mission"
+	TypeStopMissionAck   MessageType = "stop_mission_ack"
+	TypeResumeMission    MessageType = "resume_mission"
+	TypeResumeMissionAck MessageType = "resume_mission_ack"
+	TypeMissionEvent     MessageType = "mission_event"
+	TypeMissionComplete  MessageType = "mission_complete"
 
 	// Historical queries
-	TypeGetMissions       MessageType = "get_missions"
-	TypeGetMissionsResult MessageType = "get_missions_result"
-	TypeGetMission        MessageType = "get_mission"
-	TypeGetMissionResult  MessageType = "get_mission_result"
-	TypeGetTaskDetail       MessageType = "get_task_detail"
-	TypeGetTaskDetailResult MessageType = "get_task_detail_result"
-	TypeGetEvents       MessageType = "get_events"
-	TypeGetEventsResult MessageType = "get_events_result"
+	TypeGetMissions           MessageType = "get_missions"
+	TypeGetMissionsResult     MessageType = "get_missions_result"
+	TypeGetMission            MessageType = "get_mission"
+	TypeGetMissionResult      MessageType = "get_mission_result"
+	TypeGetTaskDetail         MessageType = "get_task_detail"
+	TypeGetTaskDetailResult   MessageType = "get_task_detail_result"
+	TypeGetEvents             MessageType = "get_events"
+	TypeGetEventsResult       MessageType = "get_events_result"
 	TypeGetDatasets           MessageType = "get_datasets"
 	TypeGetDatasetsResult     MessageType = "get_datasets_result"
 	TypeGetDatasetItems       MessageType = "get_dataset_items"
@@ -73,13 +73,8 @@ const (
 	TypeValidateConfig        MessageType = "validate_config"
 	TypeValidateConfigResult  MessageType = "validate_config_result"
 
-	// Variable operations
-	TypeGetVariables             MessageType = "get_variables"
-	TypeGetVariablesResult       MessageType = "get_variables_result"
-	TypeSetVariable              MessageType = "set_variable"
-	TypeSetVariableResult        MessageType = "set_variable_result"
-	TypeDeleteVariable           MessageType = "delete_variable"
-	TypeDeleteVariableResult     MessageType = "delete_variable_result"
+	// Command Center-owned workspace values pushed to the worker.
+	TypeSyncVariables MessageType = "sync_variables"
 
 	// Cost tracking
 	TypeGetCostSummary       MessageType = "get_cost_summary"
@@ -90,8 +85,8 @@ const (
 	TypeUnsubscribe MessageType = "unsubscribe"
 
 	// Shared folder operations
-	TypeListSharedFolders        MessageType = "list_shared_folders"
-	TypeListSharedFoldersResult  MessageType = "list_shared_folders_result"
+	TypeListSharedFolders       MessageType = "list_shared_folders"
+	TypeListSharedFoldersResult MessageType = "list_shared_folders_result"
 	TypeBrowseDirectory         MessageType = "browse_directory"
 	TypeBrowseDirectoryResult   MessageType = "browse_directory_result"
 	TypeReadBrowseFile          MessageType = "read_browse_file"
@@ -105,10 +100,10 @@ const (
 
 	// Human-in-the-loop (ask_human tool) — commander proxies queries and
 	// resolution through to squadron, which owns the data.
-	TypeGetHumanInputs           MessageType = "get_human_inputs"
-	TypeGetHumanInputsResult     MessageType = "get_human_inputs_result"
-	TypeResolveHumanInput        MessageType = "resolve_human_input"
-	TypeResolveHumanInputResult  MessageType = "resolve_human_input_result"
+	TypeGetHumanInputs          MessageType = "get_human_inputs"
+	TypeGetHumanInputsResult    MessageType = "get_human_inputs_result"
+	TypeResolveHumanInput       MessageType = "resolve_human_input"
+	TypeResolveHumanInputResult MessageType = "resolve_human_input_result"
 
 	// Mission-lifecycle notifications — squadron pushes these to the
 	// command center when a mission opts into command_center notifications.
