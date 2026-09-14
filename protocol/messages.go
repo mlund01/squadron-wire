@@ -598,6 +598,19 @@ type SyncVariablesPayload struct {
 	Values map[string]string `json:"values"`
 }
 
+// ModelConnection is the runtime-only provider configuration delivered by
+// Command Center. API keys must never be persisted by the worker.
+type ModelConnection struct {
+	Provider      string `json:"provider"`
+	BaseURL       string `json:"baseUrl,omitempty"`
+	APIKey        string `json:"apiKey,omitempty"`
+	PromptCaching bool   `json:"promptCaching"`
+}
+
+type SyncModelConnectionsPayload struct {
+	Connections map[string]ModelConnection `json:"connections"`
+}
+
 // =============================================================================
 // Shared folder operations
 // =============================================================================

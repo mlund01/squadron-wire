@@ -74,7 +74,8 @@ const (
 	TypeValidateConfigResult  MessageType = "validate_config_result"
 
 	// Command Center-owned workspace values pushed to the worker.
-	TypeSyncVariables MessageType = "sync_variables"
+	TypeSyncVariables        MessageType = "sync_variables"
+	TypeSyncModelConnections MessageType = "sync_model_connections"
 
 	// Cost tracking
 	TypeGetCostSummary       MessageType = "get_cost_summary"
