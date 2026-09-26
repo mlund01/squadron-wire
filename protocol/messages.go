@@ -66,6 +66,8 @@ type MissionInfo struct {
 	Description string             `json:"description,omitempty"`
 	Source      *ConfigSourceInfo  `json:"source,omitempty"`
 	Commander   string             `json:"commander,omitempty"`
+	Models      []string           `json:"models,omitempty"`
+	Tools       []string           `json:"tools,omitempty"`
 	Agents      []string           `json:"agents,omitempty"`
 	Inputs      []MissionInputInfo `json:"inputs,omitempty"`
 	Datasets    []DatasetInfo      `json:"datasets,omitempty"`
@@ -128,15 +130,19 @@ type MissionInputInfo struct {
 }
 
 type TaskInfo struct {
-	Name        string            `json:"name"`
-	Description string            `json:"description,omitempty"`
-	Objective   string            `json:"objective,omitempty"`
-	Agent       string            `json:"agent,omitempty"`
-	Commander   string            `json:"commander,omitempty"`
-	DependsOn   []string          `json:"dependsOn,omitempty"`
-	SendTo      []string          `json:"sendTo,omitempty"`
-	Iterator    *TaskIteratorInfo `json:"iterator,omitempty"`
-	Router      *TaskRouterInfo   `json:"router,omitempty"`
+	Name              string            `json:"name"`
+	Description       string            `json:"description,omitempty"`
+	Objective         string            `json:"objective,omitempty"`
+	Models            []string          `json:"models,omitempty"`
+	Tools             []string          `json:"tools,omitempty"`
+	MaxRetries        int               `json:"maxRetries,omitempty"`
+	RetryDelaySeconds int               `json:"retryDelaySeconds,omitempty"`
+	Agent             string            `json:"agent,omitempty"`
+	Commander         string            `json:"commander,omitempty"`
+	DependsOn         []string          `json:"dependsOn,omitempty"`
+	SendTo            []string          `json:"sendTo,omitempty"`
+	Iterator          *TaskIteratorInfo `json:"iterator,omitempty"`
+	Router            *TaskRouterInfo   `json:"router,omitempty"`
 }
 
 type TaskIteratorInfo struct {
@@ -295,8 +301,94 @@ type GetMissionPayload struct {
 }
 
 type GetMissionResultPayload struct {
-	Mission MissionRecordInfo `json:"mission"`
-	Tasks   []MissionTaskInfo `json:"tasks"`
+	Mission MissionRecordInfo   `json:"mission"`
+	Tasks   []MissionTaskInfo   `json:"tasks"`
+	Runtime *MissionRuntimeInfo `json:"runtime,omitempty"`
+}
+
+// MissionRuntimeInfo is an operator-facing projection of the durable mission
+// checkpoint. It is present for mission-scoped runs; older runs keep their
+// existing task/session records. The worker, not Command Center, interprets
+// the checkpoint and returns only fields intended for the run UI.
+type MissionRuntimeInfo struct {
+	Revision  uint64                      `json:"revision"`
+	State     string                      `json:"state"`
+	Commander MissionRuntimeCommanderInfo `json:"commander"`
+	Tasks     []MissionRuntimeTaskInfo    `json:"tasks"`
+}
+
+type MissionRuntimeCommanderInfo struct {
+	ID       string                      `json:"id"`
+	State    string                      `json:"state"`
+	Messages []MissionRuntimeMessageInfo `json:"messages"`
+}
+
+type MissionRuntimeMessageInfo struct {
+	ID    string                       `json:"id,omitempty"`
+	Role  string                       `json:"role"`
+	Parts []MissionRuntimeContentPart  `json:"parts"`
+	Model *MissionRuntimeModelTurnInfo `json:"model,omitempty"`
+}
+
+type MissionRuntimeContentPart struct {
+	Type              string `json:"type"`
+	Text              string `json:"text,omitempty"`
+	ToolUseID         string `json:"toolUseId,omitempty"`
+	ToolName          string `json:"toolName,omitempty"`
+	ToolInputJSON     string `json:"toolInputJson,omitempty"`
+	IsError           *bool  `json:"isError,omitempty"`
+	ImageData         string `json:"imageData,omitempty"`
+	ImageMediaType    string `json:"imageMediaType,omitempty"`
+	DocumentData      string `json:"documentData,omitempty"`
+	DocumentMediaType string `json:"documentMediaType,omitempty"`
+	DocumentFilename  string `json:"documentFilename,omitempty"`
+}
+
+type MissionRuntimeModelTurnInfo struct {
+	ID               string `json:"id"`
+	Model            string `json:"model,omitempty"`
+	InputTokens      int    `json:"inputTokens,omitempty"`
+	OutputTokens     int    `json:"outputTokens,omitempty"`
+	CacheWriteTokens int    `json:"cacheWriteTokens,omitempty"`
+	CacheReadTokens  int    `json:"cacheReadTokens,omitempty"`
+}
+
+type MissionRuntimeTaskInfo struct {
+	Name         string                        `json:"name"`
+	State        string                        `json:"state"`
+	Attempt      int                           `json:"attempt"`
+	Summary      string                        `json:"summary,omitempty"`
+	Error        string                        `json:"error,omitempty"`
+	RetryReadyAt *string                       `json:"retryReadyAt,omitempty"`
+	HumanInput   *MissionRuntimeHumanInputInfo `json:"humanInput,omitempty"`
+	Attempts     []MissionRuntimeAttemptInfo   `json:"attempts,omitempty"`
+}
+
+type MissionRuntimeHumanInputInfo struct {
+	Question     string  `json:"question"`
+	ShortSummary string  `json:"shortSummary,omitempty"`
+	RequestedAt  string  `json:"requestedAt"`
+	DeadlineAt   *string `json:"deadlineAt,omitempty"`
+}
+
+type MissionRuntimeAttemptInfo struct {
+	ID             string                            `json:"id"`
+	Number         int                               `json:"number"`
+	Model          string                            `json:"model"`
+	Tools          []string                          `json:"tools,omitempty"`
+	RunAs          string                            `json:"runAs,omitempty"`
+	DispatchedAt   string                            `json:"dispatchedAt"`
+	Phase          string                            `json:"phase,omitempty"`
+	Messages       []MissionRuntimeMessageInfo       `json:"messages,omitempty"`
+	ToolOperations []MissionRuntimeToolOperationInfo `json:"toolOperations,omitempty"`
+}
+
+type MissionRuntimeToolOperationInfo struct {
+	ToolUseID string  `json:"toolUseId"`
+	ToolName  string  `json:"toolName"`
+	Status    string  `json:"status"`
+	StartedAt *string `json:"startedAt,omitempty"`
+	IsError   bool    `json:"isError,omitempty"`
 }
 
 type GetTaskDetailPayload struct {
