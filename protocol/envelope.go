@@ -103,6 +103,8 @@ const (
 	// resolution through to squadron, which owns the data.
 	TypeGetHumanInputs          MessageType = "get_human_inputs"
 	TypeGetHumanInputsResult    MessageType = "get_human_inputs_result"
+	TypeGetHumanInput           MessageType = "get_human_input"
+	TypeGetHumanInputResult     MessageType = "get_human_input_result"
 	TypeResolveHumanInput       MessageType = "resolve_human_input"
 	TypeResolveHumanInputResult MessageType = "resolve_human_input_result"
 

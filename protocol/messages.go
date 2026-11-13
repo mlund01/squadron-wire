@@ -313,6 +313,7 @@ type GetMissionResultPayload struct {
 type MissionRuntimeInfo struct {
 	Revision  uint64                      `json:"revision"`
 	State     string                      `json:"state"`
+	TotalCost float64                     `json:"totalCost"`
 	Commander MissionRuntimeCommanderInfo `json:"commander"`
 	Tasks     []MissionRuntimeTaskInfo    `json:"tasks"`
 }
@@ -320,6 +321,7 @@ type MissionRuntimeInfo struct {
 type MissionRuntimeCommanderInfo struct {
 	ID       string                      `json:"id"`
 	State    string                      `json:"state"`
+	Cost     float64                     `json:"cost"`
 	Messages []MissionRuntimeMessageInfo `json:"messages"`
 }
 
@@ -357,6 +359,7 @@ type MissionRuntimeTaskInfo struct {
 	Name         string                        `json:"name"`
 	State        string                        `json:"state"`
 	Attempt      int                           `json:"attempt"`
+	Cost         float64                       `json:"cost"`
 	Summary      string                        `json:"summary,omitempty"`
 	Error        string                        `json:"error,omitempty"`
 	RetryReadyAt *string                       `json:"retryReadyAt,omitempty"`
@@ -871,9 +874,9 @@ type GetCostSummaryResultPayload struct {
 // Human-in-the-loop (ask_human tool)
 // =============================================================================
 //
-// Squadron owns persistence; commander proxies via GetHumanInputs and
-// ResolveHumanInput. Live updates flow through the existing mission
-// event channel as EventHumanInputRequested / EventHumanInputResolved.
+// Squadron owns persistence; commander proxies via GetHumanInputs,
+// GetHumanInput, and ResolveHumanInput. Live updates flow through the
+// existing mission event channel as requested, resolved, or canceled events.
 
 // HumanInputRecord is the JSON-safe mirror of squadron's stored row.
 // MissionName/TaskName are filled in server-side so clients don't have
@@ -890,9 +893,13 @@ type HumanInputRecord struct {
 	AdditionalContext string   `json:"additionalContext,omitempty"`
 	Choices           []string `json:"choices,omitempty"`
 	MultiSelect       bool     `json:"multiSelect,omitempty"`
-	State             string   `json:"state"` // "open" | "resolved"
+	State             string   `json:"state"` // "open" | "resolved" | "expired" | "canceled"
 	RequestedAt       string   `json:"requestedAt"`
+	DeadlineAt        string   `json:"deadlineAt,omitempty"`
 	ResolvedAt        string   `json:"resolvedAt,omitempty"`
+	ExpiredAt         string   `json:"expiredAt,omitempty"`
+	CanceledAt        string   `json:"canceledAt,omitempty"`
+	CancelReason      string   `json:"cancelReason,omitempty"`
 	Response          string   `json:"response,omitempty"`
 	ResponderUserID   string   `json:"responderUserId,omitempty"`
 }
@@ -900,7 +907,7 @@ type HumanInputRecord struct {
 // GetHumanInputsPayload is sent by commander to squadron to list
 // requests. Filters mirror the common list shape elsewhere in the API.
 type GetHumanInputsPayload struct {
-	State       string `json:"state,omitempty"`       // "open" (default) or "resolved"
+	State       string `json:"state,omitempty"`       // "open" (default), "resolved", "expired", or "canceled"
 	MissionID   string `json:"missionId,omitempty"`   // restrict to one mission
 	OldestFirst bool   `json:"oldestFirst,omitempty"` // default ordering is oldest-first
 	Limit       int    `json:"limit,omitempty"`
@@ -910,6 +917,17 @@ type GetHumanInputsPayload struct {
 type GetHumanInputsResultPayload struct {
 	HumanInputs []HumanInputRecord `json:"humanInputs"`
 	Total       int                `json:"total"`
+}
+
+// GetHumanInputPayload identifies one persisted request, independent of
+// inbox status and pagination. The worker remains its source of truth.
+type GetHumanInputPayload struct {
+	ToolCallID string `json:"toolCallId"`
+}
+
+type GetHumanInputResultPayload struct {
+	Found      bool             `json:"found"`
+	HumanInput HumanInputRecord `json:"humanInput,omitempty"`
 }
 
 // ResolveHumanInputPayload carries the human's response from commander

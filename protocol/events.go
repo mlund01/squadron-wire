@@ -43,25 +43,26 @@ const (
 	EventSessionTurn MissionEventType = "session_turn"
 
 	// Agent events
-	EventAgentStarted              MissionEventType = "agent_started"
-	EventAgentCompleted            MissionEventType = "agent_completed"
-	EventAgentReasoningStarted     MissionEventType = "agent_reasoning_started"
-	EventAgentReasoningCompleted   MissionEventType = "agent_reasoning_completed"
-	EventAgentCallingTool          MissionEventType = "agent_calling_tool"
-	EventAgentToolComplete         MissionEventType = "agent_tool_complete"
-	EventAgentAnswer               MissionEventType = "agent_answer"
-	EventAgentAskCommander         MissionEventType = "agent_ask_commander"
-	EventAgentCommanderResponse    MissionEventType = "agent_commander_response"
-	EventRouteChosen       MissionEventType = "route_chosen"
+	EventAgentStarted            MissionEventType = "agent_started"
+	EventAgentCompleted          MissionEventType = "agent_completed"
+	EventAgentReasoningStarted   MissionEventType = "agent_reasoning_started"
+	EventAgentReasoningCompleted MissionEventType = "agent_reasoning_completed"
+	EventAgentCallingTool        MissionEventType = "agent_calling_tool"
+	EventAgentToolComplete       MissionEventType = "agent_tool_complete"
+	EventAgentAnswer             MissionEventType = "agent_answer"
+	EventAgentAskCommander       MissionEventType = "agent_ask_commander"
+	EventAgentCommanderResponse  MissionEventType = "agent_commander_response"
+	EventRouteChosen             MissionEventType = "route_chosen"
 
 	// Schedule/trigger events
-	EventScheduledRun  MissionEventType = "scheduled_run"
-	EventTriggeredRun  MissionEventType = "triggered_run"
-	EventScheduleSkip  MissionEventType = "schedule_skip"
+	EventScheduledRun MissionEventType = "scheduled_run"
+	EventTriggeredRun MissionEventType = "triggered_run"
+	EventScheduleSkip MissionEventType = "schedule_skip"
 
 	// Human-in-the-loop events
 	EventHumanInputRequested MissionEventType = "human_input_requested"
 	EventHumanInputResolved  MissionEventType = "human_input_resolved"
+	EventHumanInputCanceled  MissionEventType = "human_input_canceled"
 )
 
 // =============================================================================
@@ -205,23 +206,23 @@ type CompactionData struct {
 // Session turn telemetry
 
 type SessionTurnData struct {
-	TaskName                 string  `json:"taskName"`
-	Entity                   string  `json:"entity"` // "commander" or agent name
-	Model                    string  `json:"model"`
-	InputTokens              int     `json:"inputTokens"`
-	OutputTokens             int     `json:"outputTokens"`
-	CacheWriteTokens         int     `json:"cacheWriteTokens,omitempty"`
-	CacheReadTokens          int     `json:"cacheReadTokens,omitempty"`
-	UserMessages             int     `json:"userMessages"`
-	AssistantMessages        int     `json:"assistantMessages"`
-	SystemMessages           int     `json:"systemMessages"`
-	PayloadBytes             int     `json:"payloadBytes"`
-	TurnDurationMs           int64   `json:"turnDurationMs"`
-	Cost                     float64 `json:"cost,omitempty"`     // Total cost for this turn in USD
-	InputCost                float64 `json:"inputCost,omitempty"`
-	OutputCost               float64 `json:"outputCost,omitempty"`
-	CacheReadCost            float64 `json:"cacheReadCost,omitempty"`
-	CacheWriteCost           float64 `json:"cacheWriteCost,omitempty"`
+	TaskName          string  `json:"taskName"`
+	Entity            string  `json:"entity"` // "commander" or agent name
+	Model             string  `json:"model"`
+	InputTokens       int     `json:"inputTokens"`
+	OutputTokens      int     `json:"outputTokens"`
+	CacheWriteTokens  int     `json:"cacheWriteTokens,omitempty"`
+	CacheReadTokens   int     `json:"cacheReadTokens,omitempty"`
+	UserMessages      int     `json:"userMessages"`
+	AssistantMessages int     `json:"assistantMessages"`
+	SystemMessages    int     `json:"systemMessages"`
+	PayloadBytes      int     `json:"payloadBytes"`
+	TurnDurationMs    int64   `json:"turnDurationMs"`
+	Cost              float64 `json:"cost,omitempty"` // Total cost for this turn in USD
+	InputCost         float64 `json:"inputCost,omitempty"`
+	OutputCost        float64 `json:"outputCost,omitempty"`
+	CacheReadCost     float64 `json:"cacheReadCost,omitempty"`
+	CacheWriteCost    float64 `json:"cacheWriteCost,omitempty"`
 }
 
 // Agent events
@@ -354,4 +355,9 @@ type HumanInputResolvedData struct {
 	Response        string `json:"response"`
 	ResponderUserID string `json:"responderUserId,omitempty"`
 	TimedOut        bool   `json:"timedOut,omitempty"`
+}
+
+type HumanInputCanceledData struct {
+	ToolCallID string `json:"toolCallId"`
+	Reason     string `json:"reason,omitempty"`
 }
